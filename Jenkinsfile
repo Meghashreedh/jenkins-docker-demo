@@ -21,7 +21,11 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login \
+                    -u "$DOCKER_USER" \
+                    --password-stdin
+                    '''
                 }
             }
         }
@@ -39,6 +43,12 @@ pipeline {
                 docker run -d -p 8081:80 --name demo meghadr2/jenkins-demo:latest
                 '''
             }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker logout || true'
         }
     }
 }
