@@ -20,11 +20,16 @@ pipeline {
             }
         }
 
-        stage('Run Container') {
+       stage('Run Container') {
             steps {
-                sh 'docker rm -f demo || true'
-                sh 'docker run -d -p 8081:80 --name demo $IMAGE_NAME:$IMAGE_TAG'
-            }
+                sh '''
+        docker rm -f demo || true
+        docker rm -f jenkins-demo || true
+        docker run -d -p 8081:80 --name demo $IMAGE_NAME:$IMAGE_TAG
+        '''
+    }
+}
         }
     }
 }
+
