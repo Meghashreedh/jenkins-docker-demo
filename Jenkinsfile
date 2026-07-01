@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "jenkins-demo"
-        IMAGE_TAG = "v1"
+        IMAGE_NAME = "meghadr2/jenkins-demo"
+        IMAGE_TAG = "latest"
     }
 
     stages {
@@ -14,12 +14,29 @@ pipeline {
             }
         }
 
-        stage('Run Container') {
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
+            }
+        }
+
+        stage('Deploy') {
             steps {
                 sh '''
                 docker rm -f demo || true
-                docker rm -f jenkins-demo || true
-                docker run -d -p 8081:80 --name demo $IMAGE_NAME:$IMAGE_TAG
+                docker run -d -p 8081:80 --name demo meghadr2/jenkins-demo:latest
                 '''
             }
         }
